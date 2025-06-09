@@ -10,9 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <meta name="description" content="Catálogo oficial de productos de BIA HONDURAS, distribuidora de productos alimenticios de calidad.">
 
-
-
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -21,7 +18,6 @@
 
   gtag('config', 'G-3JGC5EE4NK');
 </script>
-
 
     
 <style>
@@ -32,63 +28,104 @@ body.dark-mode {
     background-color: #000; /* fondo negro */
 }
 
+    /* Estilos generales para la sección de marcas */
+    #marcas {
+        display: flex; /* Utiliza flexbox para alinear elementos horizontalmente por defecto */
+        flex-wrap: wrap; /* Permite que los elementos se envuelvan a la siguiente línea */
+        justify-content: center; /* Centra los elementos horizontalmente */
+        gap: 30px; /* Espacio entre los elementos de la marca */
+        padding: 20px;
+    }
 
-    
-  .promo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 40px auto;
-  height: auto;
-}
+    .category {
+        text-align: center;
+        width: 180px; /* Ancho fijo para cada categoría en pantallas grandes */
+        flex-shrink: 0; /* Evita que los elementos se encojan */
+        transition: transform 0.3s ease;
+    }
 
-.promo-image {
-  max-width: 95%;
-  height: auto;
-  width: 100%;
-  border: 5px solid #0dcaf0;
-  border-radius: 20px;
-  box-shadow: 0 0 20px rgba(13, 202, 240, 0.3);
-  padding: 10px;
-  background-color: #ffffff;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  display: block;
-  margin: 0 auto; /* opcional: centra la imagen */
-}
+    .category:hover {
+        transform: translateY(-5px);
+    }
 
-.promo-image:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 30px rgba(13, 202, 240, 0.5);
-  height: auto;
-}
+    .category img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
+    .category p {
+        margin-top: 10px;
+        font-weight: 500;
+        color: #333;
+    }
 
+    /* Media Query para pantallas más pequeñas (celulares) */
+    @media (max-width: 768px) {
+        #marcas {
+            display: grid; /* Cambia a CSS Grid para el diseño en 3 columnas */
+            grid-template-columns: repeat(3, 1fr); /* 3 columnas de igual ancho */
+            gap: 15px; /* Espacio entre las marcas en el diseño de cuadrícula */
+            padding: 15px;
+        }
 
+        .category {
+            width: auto; /* Permite que el ancho de la categoría se adapte a la cuadrícula */
+        }
+    }
 
+    /* Ajustes para pantallas aún más pequeñas (quizás solo 2 columnas si 3 es demasiado) */
+    @media (max-width: 480px) {
+        #marcas {
+            grid-template-columns: repeat(2, 1fr); /* 2 columnas para pantallas muy pequeñas */
+            gap: 10px;
+        }
+    }
 
+    .promo-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 40px auto;
+        height: auto;
+    }
 
+    .promo-image {
+        max-width: 95%;
+        height: auto;
+        width: 100%;
+        border: 5px solid #0dcaf0;
+        border-radius: 20px;
+        box-shadow: 0 0 20px rgba(13, 202, 240, 0.3);
+        padding: 10px;
+        background-color: #ffffff;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: block;
+        margin: 0 auto; /* opcional: centra la imagen */
+    }
 
-
-
+    .promo-image:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 30px rgba(13, 202, 240, 0.5);
+        height: auto;
+    }
 
     @media (max-width: 600px) {
-    #nosotros h2, #contacto h2 {
-        font-size: 1.6rem;
-    }
+        #nosotros h2, #contacto h2 {
+            font-size: 1.6rem;
+        }
 
-    #nosotros p, #contacto p {
-        font-size: 0.95rem;
+        #nosotros p, #contacto p {
+            font-size: 0.95rem;
+        }
     }
-}
-
 </style>
     
 </head>
 <body>
-    <!-- Imagen de fondo transparente -->
     <div class="background-image"></div>
     
-    <!-- Barra de navegación -->
     <nav class="navbar">
         <div class="navbar-container">
             <a href="https://www.canva.com/design/DAGg3w1T_7A/V3ulF7OtPGAJ51aWkUmXew/edit?utm_content=DAGg3w1T_7A&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" class="navbar-logo">BIA HONDURAS</a>
@@ -97,20 +134,18 @@ body.dark-mode {
                 <li class="navbar-item"><a href="#marcas" class="navbar-link">Marcas</a></li>
                 <li class="navbar-item"><a href="#contacto" class="navbar-link">Contacto</a></li>
                 <li class="navbar-item"><a href="#nosotros" class="navbar-link">Nosotros</a></li>
-                 <li class="navbar-item"><a href="https://dtrejobia.github.io/CATALOGO_BIA_HONDURAS/" class="navbar-link">Actualizar cliente</a></li>
+                <li class="navbar-item"><a href="https://dtrejobia.github.io/CATALOGO_BIA_HONDURAS/" class="navbar-link">Actualizar cliente</a></li>
             </ul>
             <div class="navbar-toggle">≡</div>
         </div>
     </nav>
     
-    <!-- Encabezado principal -->
     <header>
         <br>
-           <div style="display: flex; justify-content: center;">
+            <div style="display: flex; justify-content: center;">
             <h1 class="title-3d">CATÁLOGO BIA HONDURAS</h1>
           </div>
     </header>
-    <!-- Página Principal -->
     <main id="main-page" class="container category-list fade-in">
         <p class="intro-text">Selecciona una marca para ver los productos disponibles.</p>
         
@@ -159,7 +194,6 @@ body.dark-mode {
             </div>
         </section>
         
-        <!-- Sección de Nosotros -->
         <section id="nosotros" class="fade-in">
             <h2>Sobre Nosotros</h2>
             <p>BIA HONDURAS es La alianza de familias, socios, talentos y marcas unidos para impulsar el crecimiento de nuestros sueños colectivos y dar rienda suelta a un legado de sabor.</p>
@@ -167,14 +201,13 @@ body.dark-mode {
 
         </section>
         
-        <!-- Sección de Contacto -->
         <section id="contacto" class="fade-in">
        <h2>Política de Calidad e Inocuidad</h2>
             <p>Como grupo corporativo dedicado directa o indirectamente a fabricación, distribución y comercialización de alimentos, bebidas y otros productos, nos comprometemos a garantizar la calidad y seguridad para los consumidores e inocuidad de nuestros productos a través del personal competente, la mejora continua de nuestro sistema de gestión y cultura de inocuidad y calidad, cumpliendo con los requisitos legales, del cliente y otros aplicables y mantenimiento de una comunicación efectiva con todas las partes interesadas para alcanzar nuestros objetivos.</p>
-         
+          
         </section>
 
-         <section class="promo-container">
+           <section class="promo-container">
             <div class="promo-wrapper">
             <img src="IMA_1.png" alt="Promoción destacada" class="promo-image">
           </section>
@@ -182,13 +215,11 @@ body.dark-mode {
 <footer style="background-color: #000000;" class="text-white py-3 border-top" style="border-color: #0dcaf0;">
   <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
     
-    <!-- Imagen + texto -->
     <div class="d-flex align-items-center mb-3 mb-md-0">
 
       <span class="fs-6 mb-0">&copy; 2025 BIA HONDURAS. Todos los derechos reservados.</span>
     </div>
     
-    <!-- Redes sociales -->
     <div class="d-flex gap-4">
       <a href="https://hn.linkedin.com/company/cafe-maya-honduras" target="_blank" class="social-icon">
         <i class="fab fa-linkedin fa-xl"></i>
@@ -215,12 +246,6 @@ body.dark-mode {
     text-shadow: 0 0 10px #0dcaf0, 0 0 20px #0dcaf0;
   }
 </style>
-
-
-
-
-
-        
 
 
         <div class="scroll-down">↓</div>
