@@ -1,883 +1,1440 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <a href="../index.html" class="btn-home" title="Inicio">
-        <svg viewBox="0 0 24 24">
-            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-        </svg>
-    </a>
-
-
-    <title>Productos de Café Puro Maya</title>
+    <title>Visor de Clientes</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
     <style>
-        /* Reset y estilos generales */
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
+        /* Estilos generales y reseteo básico */
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            height: 100%;
-            font-family: 'Segoe UI', sans-serif;
-            color: #000;
+            background-color: #f4f7f6; /* Fondo suave */
+            color: #333;
+            line-height: 1.6;
         }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            background-color: #f5f5f5;
-        }
-
-        /* Imagen de fondo */
-        .background-image {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://i.imgur.com/8d5Cm5p.jpeg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            opacity: 0.9;
-            z-index: -1;
-        }
-
-        /* Título 3D */
-        .title-3d {
+        /* Encabezado */
+        h2 {
             text-align: center;
-            font-size: 2em;
+            color: #2c3e50;
+            margin: 20px 0; /* Ajuste el margen superior e inferior */
+            font-size: 1.8em;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            display: inline-block;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            max-width: 90%; /* Limita el ancho del título para pantallas grandes */
+            box-sizing: border-box; /* Incluye padding y borde en el ancho */
+        }
+
+        /* Mensajes de estado */
+        #mensaje {
+            padding: 10px;
+            margin: 0 15px 15px; /* Margen a los lados para que no choque con los bordes de la pantalla */
+            border-radius: 8px;
             font-weight: bold;
-            color: #004080;
-            text-shadow: 2px 2px #a0c4e3;
-            margin-top: 20px;
-        }
-
-        /* Contenedor principal */
-        .container {
-            padding: 20px;
-            max-width: 1000px;
-            margin: auto;
-            flex: 1;
-        }
-
-        /* Títulos de listas de productos */
-        .product-list h2 {
             text-align: center;
-            color: #000;
+            background-color: #e0f2f7;
+            color: #007bff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #mensaje.success {
+            background-color: #e6ffed;
+            color: #28a745;
+        }
+        #mensaje.error {
+            background-color: #ffe6e6;
+            color: #dc3545;
+        }
+        #mensaje.warning {
+            background-color: #fff9e6;
+            color: #ffc107;
         }
 
-        .dark-mode .product-list h2 {
-            color: #fff;
-        }
-
-        /* Grid de productos */
-        .product-grid {
-            display: flex;
+        /* Contenedor de filtros y botones (Desktop/General) */
+        .filtros {
+            padding: 15px;
+            background: #ffffff;
+            display: flex; /* Usamos flexbox para el diseño de escritorio */
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-            /* Added styles for transparent box and centering */
-            border: 1px solid rgba(221, 221, 221, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-            background-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            gap: 12px;
             align-items: center;
-            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 0 15px 20px; /* Margen a los lados para que no choque con los bordes de la pantalla */
         }
 
-        /* Estilo de cada producto */
-        .product {
-            width: 200px;
-            text-align: center;
-            transition: transform 0.3s;
-            /* Modifications for transparent and centered box */
-            border: 1px solid rgba(221, 221, 221, 0.1); /* More transparent border */
-            border-radius: 10px;
-            padding: 15px;
-            background-color: rgba(255, 255, 255, 0.2); /* More transparent background */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Vertically center */
-            align-items: center; /* Horizontally center */
-            text-align: center; /* Ensure text is centered */
-        }
-
-        .product img {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .product p {
-            flex-grow: 1;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-
-        .product:hover {
-            transform: scale(1.05);
-        }
-
-        /* Botón centrado */
-        .center-button {
-            display: block;
-            margin: 40px auto 0;
-            padding: 10px 20px;
-            background-color: #004080;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: bold;
-        }
-
-        /* Estilos del footer */
-        footer {
-            width: 100%;
-            background-color: #000;
-            color: #ccc;
-            text-align: center;
-            padding: 30px 0;
-            margin-top: 20px;
-            /* Ensure footer takes full width */
-            box-sizing: border-box;
-        }
-
-        .dark-mode footer {
-            background-color: #000;
-            color: #fff;
-        }
-
-        .footer-logo {
-            height: 60px;
-            margin: 10px;
-        }
-
-        /* Animación de fundido */
-        .fade-in {
-            animation: fadeIn 1s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        /* Botón de cambio de tema */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ccc;
-            border-radius: 50%;
+        /* Estilos de los selectores e input (Desktop/General) */
+        .filtros select,
+        .filtros input[type="text"] {
+            flex: 1; /* Permite que los elementos crezcan */
             padding: 10px;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 1000;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            min-width: 150px; /* Ancho mínimo para elementos */
+            box-sizing: border-box; /* Incluye padding y borde en el ancho */
         }
 
-        /* Botón de volver al inicio */
-        .back-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #004080;
+        /* Estilos de los botones (Desktop/General) */
+        .filtros button {
+            padding: 10px 15px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            white-space: nowrap; /* Evita que el texto del botón se rompa */
+        }
+
+        /* Estilo para el botón de búsqueda */
+        #botonBuscar {
+            background-color: #007bff;
             color: white;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            display: none;
-            z-index: 1000;
+            border: none;
+        }
+        #botonBuscar:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
         }
 
-        .back-to-top.show {
-            display: block;
+        /* Estilo para los nuevos botones de generación */
+        .boton-generar {
+            background-color: #28a745; /* Green color */
+            color: white;
+            border: none;
+        }
+        .boton-generar:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        .boton-generar:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
 
-        /* Estilos para el modo oscuro */
-        .dark-mode {
-            background-color: #000;
-            color: #f5f5f5;
-        }
 
-        .dark-mode .background-image {
-            display: none;
-        }
-
-        .dark-mode .center-button {
-            background-color: #0055aa;
-        }
-
-        /* Estilos para el overlay de la imagen */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Estilos del mapa */
+        #map {
+            height: calc(100vh - 200px);
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1001;
+            border-radius: 0;
+            box-shadow: none;
+            margin-top: 0;
+            position: relative; /* Necesario para posicionar el botón flotante y el spinner */
+        }
+
+        /* Estilo para el botón de "Cómo llegar" en el popup */
+        .leaflet-popup-content button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+            margin-right: 5px; /* Added spacing between buttons */
+        }
+        .leaflet-popup-content button:hover {
+            background-color: #0056b3;
+        }
+         /* New style for the "Start Navigation" button in the popup */
+        .leaflet-popup-content .start-navigation-btn {
+            background-color: #28a745; /* Green color for start navigation */
+        }
+
+        .leaflet-popup-content .start-navigation-btn:hover {
+            background-color: #1e7e34;
+        }
+
+
+        /* *** ESTILOS PARA LAS ETIQUETAS DE CLIENTE (SOLO TEXTO VISIBLE) *** */
+        .customer-label {
+            background-color: transparent !important; /* Asegurarse de que no haya fondo */
+            border: none !important; /* Asegurarse de que no haya borde */
+            box-shadow: none !important; /* Asegurarse de que no haya sombra */
+            color: black !important; /* Texto negro */
+            padding: 0 !important; /* Eliminar relleno para que no haya 'caja' visible alrededor del texto */
+            border-radius: 0; /* Eliminar bordes redondeados */
+            font-weight: normal; /* Fuente normal */
+            white-space: nowrap; /* Evita salto de línea */
+            pointer-events: none; /* No interactuable con el mouse */
+            opacity: 1; /* Hacer completamente visible el texto */
+            font-size: 0.85em; /* Tamaño de fuente un poco más pequeño */
+        }
+
+        /* Eliminar la "punta" de la etiqueta (el triángulo) para que solo se vea el texto */
+        .leaflet-tooltip.customer-label::before {
+            display: none !important;
+        }
+
+        /* --- ESTILOS PARA LOS BOTONES FLOTANTES --- */
+        .floating-button {
+            position: absolute;
+            width: 50px; /* Ancho del botón */
+            height: 50px; /* Altura del botón */
+            color: white;
+            border-radius: 50%; /* Forma circular */
+            display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 2em; /* Tamaño del icono */
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Sombra para efecto flotante */
+            transition: background-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+            z-index: 1000; /* Asegura que esté por encima de otros elementos del mapa */
+            opacity: 0; /* Inicialmente oculto */
+            pointer-events: none; /* Deshabilita interacciones cuando está oculto */
         }
 
-        .overlay img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
+        .floating-button.visible {
+            opacity: 1; /* Visible */
+            pointer-events: auto; /* Habilita interacciones cuando está visible */
         }
 
-/* Estilos del carrito */
-/* Estilos del carrito */
-/* Estilos del carrito *//* Estilos del carrito */
-        /* Estilos del carrito */
-       
-       
-        #cart-icon {
-    position: fixed;
-    left: 20px;
-    bottom: 20px;
-    background: #3498db;
-    color: white;
-    padding: 12px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    z-index: 1000;
-  }
+        .floating-button:hover {
+            transform: translateY(-2px); /* Pequeño levantamiento al pasar el mouse */
+        }
 
-  #cart-count {
-    background: red;
-    border-radius: 50%;
-    padding: 2px 6px;
-    margin-left: 5px;
-    font-size: 14px;
-  }
+        /* Estilos específicos para el botón de "Cerrar Ruta" (X) */
+        #floatingClearRouteBtn {
+            bottom: 20px; /* Distancia desde abajo */
+            right: 20px; /* Distancia desde la derecha */
+            background-color: #dc3545; /* Color de fondo rojo (para cerrar/salir) */
+        }
+        #floatingClearRouteBtn:hover {
+            background-color: #c82333; /* Color más oscuro al pasar el mouse */
+        }
+        #floatingClearRouteBtn::before {
+            content: '\00D7'; /* Símbolo 'X' (multiplicación) */
+            font-weight: bold;
+            font-size: 1.2em; /* Ajusta el tamaño de la X */
+        }
 
+        /* >>>>> INICIO DE CAMBIO DE OPTIMIZACIÓN DE MARCADORES <<<<< */
+        /* Estilos para los marcadores de cliente */
+        .cliente-marker-icon {
+            background-color: #007bff; /* Un azul para los clientes */
+            width: 12px; /* Más pequeño */
+            height: 12px;
+            border-radius: 50%; /* Forma circular */
+            border: 2px solid white; /* Borde blanco */
+            box-shadow: 0 0 3px rgba(0,0,0,0.4);
+        }
+        /* >>>>> FIN DE CAMBIO DE OPTIMIZACIÓN DE MARCADORES <<<<< */
 
-  #cart-panel {
-   position: fixed;
-   top: 7%;
-   left: 0;
-   /* Ancho inicial, pero permitimos que crezca */
-   width: 100%;
-   max-width: 100%; /* Evita que se haga demasiado grande en pantallas pequeñas */
-   height: 80%;
-   background-color: #ffffff;
-   border-top-right-radius: 10px;
-   border: 1px solid #ddd;
-   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-   transform: translateX(-100%);
-   transition: transform 0.3s ease;
-   z-index: 1000;
-   overflow-y: auto;
-   /* Permitimos que el panel se expanda horizontalmente */
-   overflow-x: auto;
-   white-space: nowrap;
-  }
+        /* --- SPINNER DE CARGA --- */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #007bff; /* Color del spinner */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            z-index: 1001; /* Mayor que el botón flotante para que esté visible */
+            display: none; /* Oculto por defecto */
+        }
 
-  #cartTable {
-   width: auto; /* La tabla se ajusta al contenido */
-   border-collapse: collapse;
-   margin-bottom: 10px;
-  }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
 
+        .loading-spinner.visible {
+            display: block; /* Visible cuando se activa */
+        }
 
+       /* Styles for the bodega icon (MODIFIED for modern blue lines) */
+.bodega-icon {
+    width: 28px; /* Ancho de la base principal del edificio */
+    height: 20px; /* Alto de las paredes principales del edificio */
+    background: none; /* Asegura que no haya relleno de fondo */
+    border: 2px solid #007bff; /* Contorno azul para las paredes */
+    position: relative; /* Necesario para pseudo-elementos */
+    box-sizing: border-box; /* Incluye padding y borde en las dimensiones */
+    box-shadow: none; /* Sin sombra, diseño moderno */
+    border-radius: 0; /* Sin esquinas redondeadas */
+    /* Eliminar cualquier estilo previo relacionado con texto/emoji */
+}
+/* Pseudo-elemento para el techo (MODIFICADO para tamaño y centrado) */
+.bodega-icon::before {
+    content: '';
+    position: absolute;
+    bottom: 100%; /* Posicionar encima del cuerpo principal del edificio */
+    /* Para centrar el techo horizontalmente: */
+    left: 50%; /* Mueve el punto de inicio al centro del elemento padre */
+    transform: translateX(-50%); /* Ajusta la posición para centrar el propio elemento */
 
-
-
-#cart-panel.open {
-  transform: translateX(0);
+    width: 0;
+    height: 0;
+    /* Ajusta estos valores para cambiar el tamaño y la forma del techo */
+    border-left: 16px solid transparent; /* Mitad de ancho del techo deseado */
+    border-right: 16px solid transparent; /* Mitad de ancho del techo deseado */
+    border-bottom: 12px solid #007bff; /* Altura del techo y color */
+    box-sizing: border-box;
 }
 
-  #cartTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 10px;
-  }
 
-  #cartTable th, #cartTable td {
-    border: 1px solid #ccc;
-    padding: 6px;
-    text-align: center;
-    font-size: 14px;
-  }
-
-  #cart-panel button {
-
-    margin-top: 10px;
-    padding: 8px 12px;
-    background: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-
-  #cart-panel h2 {
-    margin-top: 0;
-  }
-
-/* Estilos del carrito */
-/* Estilos del carrito */
-/* Estilos del carrito *//* Estilos del carrito */
-        /* Estilos del carrito */
-       
-       
-        #cart-icon {
-    position: fixed;
-    left: 20px;
-    bottom: 20px;
-    background: #3498db;
-    color: white;
-    padding: 12px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    z-index: 1000;
-  }
-
-  #cart-count {
-    background: red;
-    border-radius: 50%;
-    padding: 2px 6px;
-    margin-left: 5px;
-    font-size: 14px;
-  }
-
-
-  #cart-panel {
-   position: fixed;
-   top: 7%;
-   left: 0;
-   /* Ancho inicial, pero permitimos que crezca */
-   width: 100%;
-   max-width: 100%; /* Evita que se haga demasiado grande en pantallas pequeñas */
-   height: 80%;
-   background-color: #ffffff;
-   border-top-right-radius: 10px;
-   border: 1px solid #ddd;
-   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-   transform: translateX(-100%);
-   transition: transform 0.3s ease;
-   z-index: 1000;
-   overflow-y: auto;
-   /* Permitimos que el panel se expanda horizontalmente */
-   overflow-x: auto;
-   white-space: nowrap;
-  }
-
-  #cartTable {
-   width: auto; /* La tabla se ajusta al contenido */
-   border-collapse: collapse;
-   margin-bottom: 10px;
-  }
-
-
-
-
-
-#cart-panel.open {
-  transform: translateX(0);
-}
-
-  #cartTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 10px;
-  }
-
-  #cartTable th, #cartTable td {
-    border: 1px solid #ccc;
-    padding: 6px;
-    text-align: center;
-    font-size: 14px;
-  }
-
-  #cart-panel button {
-
-    margin-top: 10px;
-    padding: 8px 12px;
-    background: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-
-  #cart-panel h2 {
-    margin-top: 0;
-  }
-
-
-  .btn-agregar {
-        background: linear-gradient(135deg, #00c6ff, #0072ff); /* degradado azul-turquesa */
-        color: white;
-        border: none;
-        padding: 12px 26px;
-        border-radius: 999px; /* completamente ovalado */
-        font-size: 16px;
-        font-weight: 600;
-        font-family: 'Segoe UI', sans-serif;
-        cursor: pointer;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-agregar:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        background: linear-gradient(135deg, #00bcd4, #0066cc); /* color más intenso al pasar el mouse */
-    }
-
-    .btn-agregar:active {
-        transform: scale(0.97);
-    }
-
-
-    .btn-home {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        background-color: white;
-        border: none;
-        border-radius: 50%;
-        padding: 10px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        cursor: pointer;
-        z-index: 1000;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-home svg {
-        width: 22px;
-        height: 22px;
-        fill: #007bff; /* azul moderno */
-    }
-.dark-mode #cart-panel {
-    background-color: #1a1a1a;
-    color: #f5f5f5;
-    border-color: #444;
-}
-
-.dark-mode #cartTable th,
-.dark-mode #cartTable td {
-    border-color: #555;
-    color: #f5f5f5;
-    background-color: #2a2a2a;
-}
-
-.dark-mode #cart-panel h2,
-.dark-mode #cart-panel h3 {
-    color: #f5f5f5;
-}
-
-.dark-mode #cart-panel button {
-    background-color: #444;
-    color: #fff;
-}
-
-.dark-mode #cart-panel button:hover {
-    background-color: #666;
-}
-
-        /* Media query para móviles (ancho máximo de 768px) */
+        /* --- MEDIA QUERIES PARA RESPONSIVIDAD (MÓVILES) --- */
         @media (max-width: 768px) {
-            .product-grid {
-                grid-template-columns: repeat(3, 1fr); /* 3 columnas en móviles */
-                display: grid; /* Usar grid para un mejor control de columnas */
-                gap: 5px; /* Espacio reducido entre los productos */
-                padding: 0 10px; /* Un poco de padding en los lados */
-                justify-content: center; /* Centrar el contenido de la cuadrícula */
+            /* AJUSTES PARA EL TÍTULO */
+            h2 {
+                font-size: 1.4em; /* Disminuye el tamaño de la fuente del título */
+                padding-bottom: 8px; /* Reduce el padding inferior para disminuir el "grosor" de la fila */
+                margin-top: 15px; /* Ajusta el margen superior un poco */
+                margin-bottom: 15px; /* Ajusta el margen inferior un poco */
             }
 
-            .product {
-                width: auto; /* Permitir que el grid controle el ancho */
-                padding: 10px; /* Reducir el padding interno */
+            /* AJUSTES PARA EL CUADRO DE MENSAJES */
+            #mensaje {
+                padding: 8px; /* Reduce el padding para hacerlo un poco más pequeño */
+                margin-bottom: 12px; /* Reduce el margen inferior un poco */
+                font-size: 0.9em; /* Opcional: reducir un poco la fuente del mensaje si se ve muy grande */
             }
 
-            /* Intentar centrar título y footer con align-self */
-            h1.title-3d,
-            footer {
-                align-self: center;
+            .filtros {
+                margin: 0 10px 15px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
             }
-        }
 
-        /* Nuevo: Media query para móviles aún más pequeños (ancho máximo de 480px) */
-        @media (max-width: 480px) {
-            .product-grid {
-                grid-template-columns: repeat(2, 1fr); /* 2 columnas para móviles muy pequeños */
+            .filtros .fila-filtros {
+                display: flex;
+                gap: 5px;
+                flex-wrap: nowrap;
+                justify-content: space-between;
             }
-        }
 
-        /* Media query para tabletas (entre 769px y 1024px) - Opcional, para ajustar el número de columnas */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .product-grid {
-                grid-template-columns: repeat(3, 1fr); /* Por ejemplo, 3 columnas para tabletas */
-                display: grid;
-                gap: 20px;
+            .filtros .fila-filtros select {
+                flex: 1;
+                min-width: 0;
+                padding: 8px;
+                font-size: 0.8em;
             }
-            .product {
-                width: auto;
-            }
-        }
 
-        /* Estilos para pantallas grandes (desktop) */
-        @media (min-width: 1025px) {
-            .product-grid {
-                display: flex; /* Volver a flexbox para pantallas grandes */
-                flex-wrap: wrap;
+            #busqueda {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .filtros .acciones-botones {
+                display: flex;
+                gap: 8px;
                 justify-content: center;
-                gap: 20px;
+                flex-wrap: wrap;
             }
-            .product {
-                width: 200px; /* Mantener el ancho original para pantallas grandes */
+
+            .filtros button {
+                flex: 1;
+                min-width: 100px;
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
+
+            #map {
+                height: calc(100vh - 270px);
+            }
+
+            /* Flotante en móviles */
+            .floating-button {
+                width: 40px; /* Más pequeño en móviles */
+                height: 40px;
+                font-size: 1.8em;
+            }
+
+            /* Botón de cerrar ruta (X) en mobile */
+            #floatingClearRouteBtn {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            /* Estilos para el panel de ruta en móviles */
+            .leaflet-routing-container {
+                width: 100% !important; /* Que ocupe todo el ancho */
+                max-height: 200px; /* Limita la altura */
+                overflow-y: auto; /* Habilita el scroll si es muy largo */
+                position: absolute;
+                bottom: 0; /* Colocarlo en la parte inferior del mapa */
+                left: 0;
+                background: rgba(255, 255, 255, 0.95); /* Fondo semi-transparente, un poco más opaco */
+                padding: 5px;
+                box-sizing: border-box;
+                border-top: 1px solid #ccc;
+                z-index: 900; /* Asegurar que esté por encima de los marcadores pero debajo de los botones flotantes/spinner */
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1); /* Sombra para levantarlo visualmente */
+                display: block !important; /* HACER SIEMPRE VISIBLE EN MÓVILES CUANDO SE CALCULA LA RUTA Y FORZAR LA VISIBILIDAD */
+            }
+
+            /* Asegurarse de que la lista de alternativas sea visible */
+            .leaflet-routing-alt {
+                display: block; /* Asegurarse de que esté visible */
+            }
+            /* Opcional: para compactar la lista de instrucciones, puedes ajustar el margen/padding */
+            .leaflet-routing-alt ul {
+                padding: 0;
+                margin: 0;
+                list-style: none;
+            }
+            .leaflet-routing-alt li {
+                font-size: 0.8em;
+                margin-bottom: 2px;
+            }
+
+
+            .leaflet-routing-alternatives {
+                margin-top: 5px;
+                padding-top: 5px;
+                border-top: 1px solid #eee;
+            }
+
+            .leaflet-routing-collapse-btn {
+                /* Asegurar que el botón de colapsar sea visible y funcione bien */
+                margin: 5px;
+                padding: 5px;
+            }
+
+            /* Ocultar elementos menos importantes en pantallas pequeñas para ahorrar espacio */
+            .leaflet-routing-container .leaflet-routing-geocoders,
+            .leaflet-routing-container .leaflet-routing-error {
+                font-size: 0.8em;
+            }
+
+            /* Asegurar que el summary (distancia, tiempo) se muestre bien */
+            .leaflet-routing-total {
+                font-size: 0.9em;
+                padding: 5px 0;
+            }
+
+            .leaflet-routing-icon {
+                /* Ajustar tamaño de iconos */
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+            }
+
+            /* En un tamaño un poco más pequeño (celulares muy estrechos), ajustar aún más */
+            @media (max-width: 420px) {
+                h2 {
+                    font-size: 1.3em; /* Ajuste adicional para pantallas muy pequeñas */
+                    padding-bottom: 6px;
+                }
+                #mensaje {
+                    padding: 6px;
+                    font-size: 0.85em;
+                }
+                .filtros .fila-filtros select,
+                .filtros button {
+                    font-size: 0.75em;
+                    padding: 6px;
+                }
+                .filtros .fila-filtros {
+                    gap: 3px;
+                }
+                .filtros .acciones-botones {
+                    gap: 6px;
+                }
+                #map {
+                    height: calc(100vh - 285px);
+                }
             }
         }
-
-
     </style>
 </head>
-
 <body>
-    <div class="background-image"></div>
-    <h1 class="title-3d">CATÁLOGO BIA HONDURAS</h1>
+    <h2>Visor de Clientes en el Mapa</h2>
+    <div id="mensaje">Cargando datos...</div>
 
-    <div id="Puro maya" class="container product-list fade-in">
-        <h2>Productos Molido Tostado Gourmet</h2>
-        <div class="product-grid">
-            <div class="product">
-                <img src="../FINAL-VERDE.png" alt="Café Maya de Palo" onclick="showFullImage(this.src)">
-                <p><strong>Café Maya de Palo</strong><br> 340 g <br> Código: 100102<br> Precio: L. 106</p>
-                <button class="btn-agregar" onclick="addToCart('100102', 'Café Maya de Palo', '340 g', 106)">🛒 Agregar</button>  
-            </div>
-            <div class="product">
-                <img src="../FINAL-CAFE.png" alt="Café Instantáneo" onclick="showFullImage(this.src)">
-                <p><strong>Café Maya Reserva</strong><br> 340 g <br> Código: 100104(100064)<br> Precio: L. 112</p>
-                <button class="btn-agregar" onclick="addToCart('100104(100064)', 'Café Maya Reserva', '340 g', 112)">🛒 Agregar</button>  
-            </div>
-            <div class="product">
-                <img src="../MAYA/Cofee Club/Cafe Maya Coffee Club.png" alt="Café Puro Maya 340g" onclick="showFullImage(this.src)">
-                <p><strong>Café Maya Coffee Club</strong> <br>Puro Molido 340 g <br> Código: 100031<br> Precio: L. 114</p>
-                <button class="btn-agregar" onclick="addToCart('100031', 'Café Maya Coffee Club', 'Puro Molido 340 g', 114)">🛒 Agregar</button>  
-            </div>
-            <div class="product">
-                <img src="../MAYA/Cofee Club/Cafe Maya Coffee Club Puro grano.png" alt="Coffe Club Molido 340g" onclick="showFullImage(this.src)">
-                <p><strong>Café Maya Coffee Club</strong><br>Puro Grano340 g<br> Código: 100032<br>Precio: L. 114</p>
-                <button class="btn-agregar" onclick="addToCart('100032', 'Café Maya Coffee Club', 'Puro Grano 340 g', 114)">🛒 Agregar</button>  
-            </div>
+    <div class="filtros">
+        <div class="fila-filtros">
+            <select id="ruta"><option value="">Ruta</option></select>
+            <select id="semana"><option value="">Semana</option></select>
+            <select id="dia"><option value="">Día de Visita</option></select>
         </div>
-      <a href="javascript:history.back()" class="center-button">⬅ Volver</a>
-    
+        <input type="text" id="busqueda" placeholder="Buscar por nombre o código" />
+        <div class="acciones-botones">
+            <button id="botonBuscar">Buscar</button>
+           
+            <button id="generarPdfBtn" class="boton-generar" disabled>Generar PDF</button>
+            <button id="generarExcelBtn" class="boton-generar" disabled>Generar Excel</button>
+            <button id="logoutBtn" style="background-color: #dc3545; margin-left: 10px;">Cerrar Sesión</button>
+        </div>
     </div>
 
-    <footer>
-        <p>&copy; 2025 BIA HONDURAS. Todos los derechos reservados.</p>
-        <p><a href="#" style="color: inherit;">Política de Privacidad</a> | <a href="#" style="color: inherit;">Términos y Condiciones</a></p>
-    </footer>
-
-    <div id="imageOverlay" class="overlay">
-        <img src="" alt="Full Size Image">
+    <div id="map">
+        <div id="loadingSpinner" class="loading-spinner"></div>
     </div>
+    <div id="floatingClearRouteBtn" class="floating-button"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<div id="cart-icon" onclick="toggleCartPanel()">
-    🛒 <span id="cart-count">0</span>
-  </div>
-   <div id="cart-panel">
-    <h2>🛒 Carrito</h2>
-    <table id="cartTable">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th>Cant.</th>
-          <th>Subtotal</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <h3>Total: <span id="totalPrice">L. 0.00</span></h3>
-    <button onclick="downloadPDF()">📥 Descargar PDF</button>
-    <button onclick="emptyCart()">🗑 Vaciar carrito</button>
-  </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
+        // Tu configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDxDNRnjue1pSeWRpZq8oleyXUYhqyuUgs", // Reemplaza con tu API Key
+            authDomain: "rutas-6889d.firebaseapp.com",
+            projectId: "rutas-6889d",
+            storageBucket: "rutas-6889d.firebasestorage.app",
+            messagingSenderId: "235327748125",
+            appId: "1:235327748125:web:84112296e5c13d88d6eef4",
+            measurementId: "G-4MWQ1ZH3CL"
+        };
 
+        // Inicializa Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app); // Opcional
+        const auth = getAuth(app);
+
+        let watchId; // Para almacenar el ID del observador de geolocalización
+
+        // *** CÓDIGO DE VERIFICACIÓN DE AUTENTICACIÓN ***
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuario autenticado. Procede a cargar los datos y el mapa.
+                console.log('Usuario autenticado:', user.email);
+            } else {
+                // Usuario NO autenticado, redirige a la página de login (index.html)
+                console.log('Usuario no autenticado. Redirigiendo a index.html (login).');
+                // Limpiar la geolocalización si el usuario cierra sesión
+                if (watchId) {
+                    navigator.geolocation.clearWatch(watchId);
+                    watchId = null;
+                }
+                window.location.href = 'index.html'; // <--- Redirección a la página de login
+            }
+        });
+        // *** FIN CÓDIGO DE VERIFICACIÓN DE AUTENTICACIÓN ***
+
+        // Lógica para cerrar sesión
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    console.log('Sesión cerrada.');
+                    // onAuthStateChanged detectará el cierre de sesión y redirigirá automáticamente.
+                } catch (error) {
+                    console.error('Error al cerrar sesión:', error);
+                    alert('Error al cerrar sesión. Intenta de nuevo.');
+                }
+            });
+        }
+    </script>
     <script>
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+        let clientes = [];
+        let marcadores = [];
+        let mapa;
+        let ubicacionActualMarker;
+        const ZOOM_THRESHOLD_FOR_LABELS = 15;
+        let filteredClientsData = []; // To store the currently filtered clients
+
+        let geolocationWatchId = null; // Para almacenar el ID del observador de geolocalización
+        let currentRouteControl = null; // Variable para almacenar la ruta actual de Leaflet Routing Machine
+        let clearRouteBtn; // Declarar aquí para que sea accesible globalmente
+        let loadingSpinner; // Variable para el spinner de carga
+
+        // Variables para reintento de ruteo
+        let routingRetryTimeout = null; // Para almacenar el ID del timeout de reintento
+        let currentDestLat = null;
+        let currentDestLon = null;
+        let retryAttempt = 0;
+        const MAX_RETRIES = 300; // Aumentado significativamente para dar "minutos" (ej. 300 * 5s = 25 minutos)
+        const RETRY_DELAY_MS = 5000; // Aumentado a 5 segundos de espera entre reintentos
+
+        // Define the bodega icon (MODIFIED for modern blue lines)
+        const bodegaIcon = L.divIcon({
+            className: 'bodega-icon',
+            iconSize: [16, 16], // Ancho: 28px, Alto: 20px (cuerpo) + 12px (techo) = 32px
+            iconAnchor: [8, 16] // Punto de anclaje del ícono (parte inferior central)
+        });
+
+        // Define the bodega locations
+        const bodegaLocations = [
+            { name: "SPS", lat: 15.50064223, lon: -87.98695562 },
+            { name: "Ceiba", lat: 15.7870985, lon: -86.7877081 },
+            { name: "SRC", lat: 14.7837324, lon: -88.7808274 },
+            { name: "Amarateca", lat: 14.223608, lon: -87.357118 },
+            { name: "Torres", lat: 14.0597121, lon: -87.2301253 }
+        ];
+
+        function setMensaje(text, type = "info") {
+            const mensaje = document.getElementById("mensaje");
+            mensaje.textContent = text;
+            mensaje.className = "";
+            mensaje.classList.add(type);
+        }
+
+        function showSpinner() {
+            if (loadingSpinner) {
+                loadingSpinner.classList.add('visible');
+            }
+        }
+
+        function hideSpinner() {
+            if (loadingSpinner) {
+                loadingSpinner.classList.remove('visible');
+            }
+        }
+
+        async function cargarDatos() {
+            loadingSpinner = document.getElementById("loadingSpinner"); // Obtener el spinner
+            showSpinner(); // Mostrar spinner al inicio de la carga
+
+            setMensaje("Cargando datos...", "info");
+
+            try {
+                // Asegúrate de que esta URL sea la correcta de tu Google Apps Script
+                const respuesta = await fetch("https://script.google.com/macros/s/AKfycbwWOCQz7M7NZ8ST2XDgmBfr3gWRoG8VEr_qU70kPyVkppAUxdMb9todmvhK_rWH2JcH/exec");
+                if (!respuesta.ok) throw new Error("No se pudo conectar al servidor.");
+
+                const datos = await respuesta.json();
+
+                if (!Array.isArray(datos) || datos.length === 0) {
+                    setMensaje("No se encontraron datos en la hoja.", "warning");
+                    return; // Retornar para que finally oculte el spinner
+                }
+
+                const obligatorios = ["Nombre", "Latitud", "Longitud", "Ruta", "Semana", "Día de Visita", "Código", "Dirección", "Teléfono", "ID", "RTN", "Canal", "Supervisor", "Región", "Sucursal", "Departamento", "Municipio"];
+                for (let campo of obligatorios) {
+                    if (!(campo in datos[0])) {
+                        setMensaje(`Falta el campo requerido: ${campo}. Asegúrese de que los encabezados coincidan.`, "error");
+                        return; // Retornar para que finally oculte el spinner
+                    }
+                }
+
+                clientes = datos;
+                setMensaje("Datos cargados correctamente. Seleccione una ruta para ver clientes.", "success");
+
+                inicializarMapa();
+                inicializarFiltros();
+                
+                // INICIAR GEOLOCALIZACIÓN AUTOMÁTICAMENTE AL CARGAR LA PÁGINA
+                mostrarUbicacionActual();
+
+                // Asignar los botones flotantes
+                clearRouteBtn = document.getElementById("floatingClearRouteBtn");
+                clearRouteBtn.addEventListener("click", clearRoute);
+
+                // Añadir listener para el evento de zoom
+                mapa.on('zoomend', actualizarVisibilidadEtiquetas);
+
+            } catch (error) {
+                setMensaje(`Error al cargar datos: ${error.message}`, "error");
+            } finally {
+                hideSpinner(); // Asegurar que el spinner se oculte al finalizar la carga
+            }
+        }
+
+        function inicializarMapa() {
+            if (mapa) {
+                mapa.remove();
+            }
+            // Aumentar el zoom inicial del mapa (de 7 a 10) y configurar el zoom máximo
+            mapa = L.map("map", { maxZoom: 19 }).setView([14.6349, -90.5069], 10);
+            
+            // Definir las capas base
+            const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "© OpenStreetMap contributors",
+                maxZoom: 19 // Asegurar que el tile layer también soporta el zoom máximo
+            });
+
+            const openTopoMapLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+                maxZoom: 17 // Max zoom para OpenTopoMap
+            });
+
+            const cartoDBPositron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                maxZoom: 19
+            });
+
+            const esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                maxZoom: 19
+            });
+
+            // Añadir la capa OpenStreetMap por defecto
+            osmLayer.addTo(mapa);
+
+            // Crear un objeto con las capas base para el control de capas
+            const baseLayers = {
+                "OpenStreetMap": osmLayer,
+                "OpenTopoMap": openTopoMapLayer,
+                "CartoDB Positron": cartoDBPositron,
+                "ESRI World Imagery": esriWorldImagery
+            };
+
+            // Crear un objeto vacío para las capas superpuestas (puedes añadir aquí marcadores o otras capas si lo necesitas)
+            const overlayLayers = {}; 
+
+            // Añadir el control de capas al mapa
+            L.control.layers(baseLayers, overlayLayers).addTo(mapa);
+
+
+            // Add bodega markers
+            bodegaLocations.forEach(bodega => {
+                const marker = L.marker([bodega.lat, bodega.lon], { icon: bodegaIcon }).addTo(mapa);
+                marker.bindPopup(`<b>Bodega:</b> ${bodega.name}`);
+               //  marker.bindTooltip(bodega.name, { permanent: false, direction: 'top', className: 'customer-label' }).openTooltip();
             });
         }
 
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        function inicializarFiltros() {
+            document.getElementById("ruta").addEventListener("change", () => {
+                document.getElementById("semana").value = "";
+                document.getElementById("dia").value = "";
+                // Limpiar el campo de búsqueda de texto cuando se selecciona una ruta
+                document.getElementById("busqueda").value = ""; 
+                actualizarFiltroSemana();
+                aplicarFiltros(); 
+            });
+
+            document.getElementById("semana").addEventListener("change", () => {
+                // Limpiar el campo de búsqueda de texto cuando se selecciona una semana
+                document.getElementById("busqueda").value = ""; 
+                actualizarFiltroDia();
+                aplicarFiltros(); 
+            });
+            document.getElementById("dia").addEventListener("change", () => {
+                // Limpiar el campo de búsqueda de texto cuando se selecciona un día
+                document.getElementById("busqueda").value = ""; 
+                aplicarFiltros(); 
+            });
+
+            document.getElementById("busqueda").addEventListener("input", function() {
+                // Si el campo de búsqueda de texto se vacía, aplicar filtros
+                if (this.value === "") {
+                    // Si la búsqueda se vacía, reiniciar los filtros de ruta/semana/día para que se apliquen
+                    document.getElementById("ruta").value = "";
+                    document.getElementById("semana").value = "";
+                    document.getElementById("dia").value = "";
+                    actualizarFiltroSemana(); // Esto también reinicializa el día
+                    aplicarFiltros();
+                }
+            });
+            document.getElementById("botonBuscar").addEventListener("click", buscarCliente);
+            document.getElementById("generarPdfBtn").addEventListener("click", generarPdf);
+            document.getElementById("generarExcelBtn").addEventListener("click", generarExcel);
+
+
+            cargarFiltroRutaInicial();
         }
 
-        function showFullImage(imgSrc) {
-            const overlay = document.getElementById('imageOverlay');
-            const overlayImg = overlay.querySelector('img');
-            overlayImg.src = imgSrc;
-            overlay.style.display = 'flex';
-            overlay.addEventListener('click', closeFullImage);
+        function cargarFiltroRutaInicial() {
+            const todasRutas = [...new Set(clientes.map(c => c["Ruta"]).filter(Boolean))].sort();
+            actualizarSelect("ruta", todasRutas, "Ruta");
+
+            setMensaje("Seleccione una ruta para ver clientes en el mapa.", "info");
+            mostrarMarcadores([]); // Mostrar solo la ubicación actual si existe, sin clientes
+            actualizarFiltroSemana();
+            toggleGenerarButtons(); // Disable buttons initially
         }
 
-        function closeFullImage() {
-            const overlay = document.getElementById('imageOverlay');
-            overlay.style.display = 'none';
-            overlay.removeEventListener('click', closeFullImage);
+        function actualizarFiltroSemana() {
+            const rutaSeleccionada = document.getElementById("ruta").value;
+            let semanas = [];
+
+            if (rutaSeleccionada) {
+                const clientesEnRuta = clientes.filter(c => c["Ruta"] === rutaSeleccionada);
+                semanas = [...new Set(clientesEnRuta.map(c => c["Semana"]).filter(Boolean))].sort();
+            }
+            actualizarSelect("semana", semanas, "Semana");
+            actualizarFiltroDia();
         }
 
+        function actualizarFiltroDia() {
+            const rutaSeleccionada = document.getElementById("ruta").value;
+            const semanaSeleccionada = document.getElementById("semana").value;
+            let dias = [];
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
+            if (rutaSeleccionada) {
+                let clientesParaDias = clientes.filter(c => c["Ruta"] === rutaSeleccionada);
+                if (semanaSeleccionada) {
+                    clientesParaDias = clientesParaDias.filter(c => c["Semana"] === semanaSeleccionada);
+                }
+                dias = [...new Set(clientesParaDias.map(c => c["Día de Visita"]).filter(Boolean))].sort();
+            }
+            actualizarSelect("dia", dias, "Día de Visita");
+        }
+
+        function actualizarSelect(id, valores, placeholderText) {
+            const select = document.getElementById(id);
+            const seleccionado = select.value;
+            select.innerHTML = `<option value="">${placeholderText}</option>`;
+
+            valores.forEach(valor => {
+                const option = document.createElement("option");
+                option.value = valor;
+                option.textContent = valor;
+                if (valor === seleccionado) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function aplicarFiltros() {
+            showSpinner(); // Mostrar spinner al aplicar filtros
+            // Limpiar el campo de búsqueda de texto explícitamente al aplicar filtros de selectores
+            document.getElementById("busqueda").value = ""; 
+            const ruta = document.getElementById("ruta").value;
+            const semana = document.getElementById("semana").value;
+            const dia = document.getElementById("dia").value;
+            const busquedaTexto = ""; // La búsqueda de texto se ignora o se considera vacía aquí
+
+            setMensaje("Aplicando filtros...", "info");
+
+            let filtrados = clientes.filter(c =>
+                (c["Ruta"] === ruta || !ruta) && 
+                (!semana || c["Semana"] === semana) &&
+                (!dia || c["Día de Visita"] === dia)
+            );
+            
+            if (busquedaTexto) {
+                filtrados = filtrados.filter(c =>
+                    (c["Nombre"] && c["Nombre"].toLowerCase().includes(busquedaTexto)) ||
+                    (c["Código"] && c["Código"].toString().toLowerCase().includes(busquedaTexto))
+                );
             }
 
-            const themeToggle = document.createElement('div');
-            themeToggle.className = 'theme-toggle';
-            themeToggle.innerHTML = document.body.classList.contains('dark-mode') ? '🌙' : '☀️';
-            themeToggle.addEventListener('click', function() {
-                toggleDarkMode();
-                this.innerHTML = document.body.classList.contains('dark-mode') ? '🌙' : '☀️';
+            if (!ruta) {
+                setMensaje("Seleccione una ruta para ver clientes.", "info");
+                mostrarMarcadores([]);
+                filteredClientsData = [];
+                toggleGenerarButtons();
+                hideSpinner(); 
+                return;
+            }
+
+            filteredClientsData = filtrados; // Store filtered data
+            toggleGenerarButtons(); // Update button state
+
+            if (filtrados.length === 0) {
+                setMensaje("No se encontraron clientes para los filtros seleccionados.", "warning");
+            } else {
+                setMensaje(`Mostrando ${filtrados.length} cliente(s) en el mapa.`, "success");
+            }
+            mostrarMarcadores(filtrados);
+            actualizarVisibilidadEtiquetas();
+            hideSpinner(); 
+        }
+
+        function toggleGenerarButtons() {
+            const ruta = document.getElementById("ruta").value;
+            const dia = document.getElementById("dia").value;
+            const generarPdfBtn = document.getElementById("generarPdfBtn");
+            const generarExcelBtn = document.getElementById("generarExcelBtn");
+
+            const enableButtons = ruta && dia && filteredClientsData.length > 0;
+
+            generarPdfBtn.disabled = !enableButtons;
+            generarExcelBtn.disabled = !enableButtons;
+        }
+
+        function mostrarMarcadores(lista) {
+            marcadores = marcadores.filter(m => {
+                if (m === ubicacionActualMarker) {
+                    return true;
+                }
+                if (m.options.icon && m.options.icon.options && m.options.icon.options.className === 'bodega-icon') {
+                     return true;
+                }
+                mapa.removeLayer(m);
+                return false;
             });
-            document.body.appendChild(themeToggle);
 
-            const backToTopBtn = document.createElement('div');
-            backToTopBtn.className = 'back-to-top';
-            backToTopBtn.innerHTML = '↑';
-            backToTopBtn.addEventListener('click', scrollToTop);
-            document.body.appendChild(backToTopBtn);
-
-            window.addEventListener('scroll', function() {
-                backToTopBtn.classList.toggle('show', window.pageYOffset > 300);
+            if (ubicacionActualMarker && !mapa.hasLayer(ubicacionActualMarker)) {
+                 ubicacionActualMarker.addTo(mapa);
+            }
+            
+            bodegaLocations.forEach(bodega => {
+                let found = false;
+                mapa.eachLayer(layer => {
+                    if (layer instanceof L.Marker && layer.getLatLng().equals(L.latLng(bodega.lat, bodega.lon))) {
+                        found = true;
+                    }
+                });
+                if (!found) {
+                    const marker = L.marker([bodega.lat, bodega.lon], { icon: bodegaIcon }).addTo(mapa);
+                    marker.bindPopup(`<b>Bodega:</b> ${bodega.name}`);
+                    marker.bindTooltip(bodega.name, { permanent: true, direction: 'top', className: 'customer-label' }).openTooltip();
+                }
             });
 
-            loadCartFromStorage(); // Asegúrate de que esta línea esté aquí para cargar el carrito al inicio
+
+            if (lista.length === 0) {
+                if (ubicacionActualMarker) {
+                    mapa.setView(ubicacionActualMarker.getLatLng(), mapa.getZoom());
+                } else {
+                    const allPoints = bodegaLocations.map(b => L.latLng(b.lat, b.lon));
+                    if (allPoints.length > 0) {
+                        const bounds = L.latLngBounds(allPoints);
+                        mapa.fitBounds(bounds, { padding: [20, 20] });
+                    } else {
+                        mapa.setView([14.6349, -90.5069], 7);
+                    }
+                }
+                actualizarVisibilidadEtiquetas();
+                if (currentRouteControl) {
+                    mapa.removeControl(currentRouteControl);
+                    currentRouteControl = null;
+                    clearRouteBtn.classList.remove('visible');
+                    // Stop any pending retries if route is cleared
+                    if (routingRetryTimeout) {
+                        clearTimeout(routingRetryTimeout);
+                        routingRetryTimeout = null;
+                    }
+                    retryAttempt = 0; // Reset retry counter
+                }
+                return;
+            }
+
+            const clienteIcon = L.divIcon({
+                className: 'cliente-marker-icon',
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            });
+
+            lista.forEach(cliente => {
+                const lat = parseFloat(cliente["Latitud"]);
+                const lon = parseFloat(cliente["Longitud"]);
+
+                if (isNaN(lat) || isNaN(lon)) {
+                    console.warn(`Cliente "${cliente["Nombre"] || cliente["Código"]}" tiene coordenadas inválidas: Lat ${cliente["Latitud"]}, Lon ${cliente["Longitud"]}. Ignorando.`);
+                    return;
+                }
+
+                const marcador = L.marker([lat, lon], { icon: clienteIcon }).addTo(mapa);
+
+                const info = `
+                    <b>Código:</b> ${cliente["Código"] || "N/A"}<br>
+                    <b>Nombre:</b> ${cliente["Nombre"] || "N/A"}<br>
+                    <b>Ruta:</b> ${cliente["Ruta"] || "N/A"}<br>
+                    <b>Semana:</b> ${cliente["Semana"] || "N/A"}<br>
+                    <b>Día:</b> ${cliente["Día de Visita"] || "N/A"}<br>
+                    <b>Dirección:</b> ${cliente["Dirección"] || "N/A"}<br>
+                    <b>Teléfono:</b> ${cliente["Teléfono"] || "N/A"}<br>
+                    <b>ID:</b> ${cliente["ID"] || "N/A"}<br>
+                    <b>RTN:</b> ${cliente["RTN"] || "N/A"}<br>
+                    <b>Canal:</b> ${cliente["Canal"] || "N/A"}<br>
+                    <b>Supervisor:</b> ${cliente["Supervisor"] || "N/A"}<br>
+                    <b>Región:</b> ${cliente["Región"] || "N/A"}<br>
+                    <b>Sucursal:</b> ${cliente["Sucursal"] || "N/A"}<br>
+                    <b>Departamento:</b> ${cliente["Departamento"] || "N/A"}<br>
+                    <b>Municipio:</b> ${cliente["Municipio"] || "N/A"}<br>
+                    <button onclick="obtenerIndicacionesCliente(${lat}, ${lon})">Cómo llegar</button>
+                    <button class="start-navigation-btn" onclick="iniciarNavegacion(${lat}, ${lon})">Iniciar Navegación</button>`;
+                marcador.bindPopup(info);
+
+                if (cliente["Nombre"]) {
+                    marcador.bindTooltip(cliente["Nombre"], {
+                        permanent: true,
+                        direction: 'right',
+                        offset: [5, 0],
+                        className: 'customer-label'
+                    }).openTooltip();
+                }
+                marcadores.push(marcador);
+            });
+
+            const clientsAndUserMarkers = marcadores.filter(m => m !== ubicacionActualMarker && !(m.options.icon && m.options.icon.options && m.options.icon.options.className === 'bodega-icon'));
+            
+            let pointsToFit = [];
+            if (clientsAndUserMarkers.length > 0) {
+                pointsToFit = pointsToFit.concat(clientsAndUserMarkers.map(m => m.getLatLng()));
+            }
+            if (ubicacionActualMarker) {
+                pointsToFit.push(ubicacionActualMarker.getLatLng());
+            }
+            bodegaLocations.forEach(b => pointsToFit.push(L.latLng(b.lat, b.lon)));
+
+            if (pointsToFit.length > 0) {
+                 const group = L.featureGroup(pointsToFit.map(p => L.marker(p)));
+                 mapa.fitBounds(group.getBounds(), { padding: [20, 20] });
+            } else {
+                mapa.setView([14.6349, -90.5069], 7);
+            }
+            
+            actualizarVisibilidadEtiquetas();
+        }
+
+        function actualizarVisibilidadEtiquetas() {
+            const currentZoom = mapa.getZoom();
+            marcadores.forEach(marker => {
+                if (marker.getTooltip() && marker !== ubicacionActualMarker && marker.getTooltip()._container.classList.contains('customer-label')) {
+                    if (currentZoom >= ZOOM_THRESHOLD_FOR_LABELS) {
+                        marker.openTooltip();
+                    } else {
+                        marker.closeTooltip();
+                    }
+                }
+            });
+            mapa.eachLayer(layer => {
+                if (layer instanceof L.Marker && layer.options.icon && layer.options.icon.options.className === 'bodega-icon') {
+                    if (layer.getTooltip()) {
+                        layer.openTooltip();
+                    }
+                }
+            });
+        }
+
+        function buscarCliente() {
+            showSpinner();
+            const texto = document.getElementById("busqueda").value.toLowerCase().trim();
+
+            document.getElementById("ruta").value = "";
+            document.getElementById("semana").value = "";
+            document.getElementById("dia").value = "";
+            actualizarFiltroSemana();
+
+            setMensaje("Buscando clientes...", "info");
+
+            if (!texto) {
+                aplicarFiltros(); 
+                hideSpinner(); 
+                return;
+            }
+
+            const coincidencias = clientes.filter(c =>
+                (c["Nombre"] && c["Nombre"].toLowerCase().includes(texto)) ||
+                (c["Código"] && c["Código"].toString().toLowerCase().includes(texto))
+            );
+
+            filteredClientsData = coincidencias; // Store filtered data
+            toggleGenerarButtons(); // Update button state
+
+            if (coincidencias.length === 0) {
+                setMensaje("No se encontraron clientes con ese nombre o código.", "warning");
+            } else {
+                setMensaje(`Mostrando ${coincidencias.length} cliente(s) por búsqueda.`, "success");
+            }
+            mostrarMarcadores(coincidencias);
+            actualizarVisibilidadEtiquetas();
+            hideSpinner(); 
+        }
+
+        function clearRoute() {
+            if (currentRouteControl) {
+                mapa.removeControl(currentRouteControl);
+                currentRouteControl = null;
+            }
+            clearRouteBtn.classList.remove('visible');
+
+            // Also clear any pending routing retries
+            if (routingRetryTimeout) {
+                clearTimeout(routingRetryTimeout);
+                routingRetryTimeout = null;
+            }
+            retryAttempt = 0; // Reset retry counter
+
+            setMensaje("Ruta despejada.", "info");
+            aplicarFiltros();
+        }
+
+        // Renamed to _obtenerIndicacionesCliente to be called internally
+        function _obtenerIndicacionesCliente(destLat, destLon) {
+            // Clear any previous retry timeout
+            if (routingRetryTimeout) {
+                clearTimeout(routingRetryTimeout);
+                routingRetryTimeout = null;
+            }
+
+            if (!ubicacionActualMarker || !ubicacionActualMarker.getLatLng()) {
+                console.error("Routing error: Current location not available for routing.");
+                setMensaje("Obteniendo ubicación para la ruta...", "warning"); // Mensaje más suave
+                showSpinner(); // Mantener spinner si esperamos ubicación
+                // Si la ubicación no está disponible, no podemos intentar la ruta.
+                // Podemos esperar a que 'watchPosition' la actualice y luego intentar la ruta.
+                // Sin embargo, si la ubicación actual no se ha obtenido NUNCA, no reintentamos ruteo.
+                // Si ubicacionActualMarker es null, significa que watchPosition aún no ha tenido éxito.
+                // No iniciar el reintento de ruteo hasta que tengamos una ubicación inicial.
+                return; 
+            }
+
+            // --- IMPORTANTE: Asegurarse de remover el control de ruteo anterior antes de crear uno nuevo ---
+            // Esto resuelve el problema de que la línea azul no se muestre después de un reintento.
+            if (currentRouteControl) {
+                mapa.removeControl(currentRouteControl);
+                currentRouteControl = null;
+            }
+            // --- FIN IMPORTANTE ---
+
+            const currentOriginLat = ubicacionActualMarker.getLatLng().lat;
+            const currentOriginLon = ubicacionActualMarker.getLatLng().lng;
+
+            currentRouteControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(currentOriginLat, currentOriginLon),
+                    L.latLng(destLat, destLon)
+                ],
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'https://router.project-osrm.org/route/v1'
+                }),
+                routeWhileDragging: false,
+                show: true,
+                language: 'es',
+                lineOptions: {
+                    styles: [{color: '#007bff', opacity: 0.8, weight: 7}]
+                },
+                altLineOptions: {
+                    styles: [{color: '#555', opacity: 0.4, weight: 5, dashArray: '10, 10'}]
+                }
+            }).addTo(mapa);
+
+            // Solo mostrar este mensaje si es el primer intento
+            if (retryAttempt === 0) {
+                setMensaje("Calculando ruta al cliente...", "info");
+            } else {
+                const totalMinutes = Math.round(MAX_RETRIES * RETRY_DELAY_MS / 60000);
+                const currentMinutesPassed = Math.round(retryAttempt * RETRY_DELAY_MS / 60000);
+                const remainingAttempts = MAX_RETRIES - retryAttempt;
+                const remainingTime = Math.round(remainingAttempts * RETRY_DELAY_MS / 1000); // Remaining seconds
+                
+                setMensaje(`Problema de ruta. Reintentando en ${RETRY_DELAY_MS/1000}s... Intento ${retryAttempt}/${MAX_RETRIES}.`, "info");
+                console.log(`Reintentando cálculo de ruta (${retryAttempt}/${MAX_RETRIES}). Tiempo restante estimado: ${remainingTime} segundos.`);
+            }
+            
+            clearRouteBtn.classList.add('visible');
+            showSpinner(); // Asegurarse de que el spinner siempre esté visible durante los reintentos
+
+            currentRouteControl.on('routesfound', function(e) {
+                const routes = e.routes;
+                if (routes.length > 0) {
+                    const summary = routes[0].summary;
+                    setMensaje(`Ruta encontrada: ${summary.totalDistance / 1000} km, ${Math.round(summary.totalTime / 60)} min.`, "success");
+                    const routeBounds = L.latLngBounds(routes[0].coordinates);
+                    mapa.fitBounds(routeBounds, { padding: [50, 50] });
+                    retryAttempt = 0; // Reset retry counter on success
+                } else {
+                    console.warn("Routing warning: No route found by the service.");
+                    // No hay una ruta encontrada pero no es un error de comunicación, no reintentamos por HTTP request failed.
+                    // Podríamos considerar un reintento si "no route found" es una situación temporal de OSRM.
+                    setMensaje("No se encontró una ruta directa. Intenta despejar y reintentar.", "warning");
+                }
+                hideSpinner(); // Ocultar spinner al encontrar ruta (éxito o no encontrada)
+            });
+
+            currentRouteControl.on('routingerror', function(e) {
+                const errorMessage = e.error && e.error.message ? e.error.message : "Error desconocido al calcular la ruta.";
+                console.error('Routing error:', errorMessage, e.error); // Log the error for debugging
+
+                // No ocultar spinner aquí, ya que se oculta si la ruta se encuentra o si se agotan los reintentos
+                // showSpinner() ya está arriba, asegurándose de que esté visible.
+
+                if (retryAttempt < MAX_RETRIES) {
+                    retryAttempt++;
+                    routingRetryTimeout = setTimeout(() => {
+                        _obtenerIndicacionesCliente(currentDestLat, currentDestLon); // Re-call the routing function with stored destination
+                    }, RETRY_DELAY_MS);
+                } else {
+                    console.error("Routing failed after multiple retries. Clearing route.");
+                    clearRoute(); // This will also reset retryAttempt and timeout, and hide spinner
+                    setMensaje("No se pudo calcular la ruta después de varios intentos.", "warning"); // Mensaje suave de fallo final
+                }
+            });
+
+            // Start watching for geolocation updates to refresh the route
+            if ("geolocation" in navigator) {
+                if (geolocationWatchId) {
+                    navigator.geolocation.clearWatch(geolocationWatchId);
+                }
+                geolocationWatchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        if (ubicacionActualMarker) {
+                            ubicacionActualMarker.setLatLng([lat, lon]);
+                        } else {
+                            ubicacionActualMarker = L.marker([lat, lon], {
+                                icon: L.divIcon({
+                                    className: 'ubicacion-actual-icon',
+                                    html: '<div style="background-color: #28a745; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>',
+                                    iconSize: [26, 26],
+                                    iconAnchor: [13, 13]
+                                })
+                            }).addTo(mapa)
+                              .bindPopup("¡Estás aquí!").openPopup();
+                            marcadores.push(ubicacionActualMarker);
+                        }
+
+                        // Update the route's origin waypoint
+                        if (currentRouteControl && currentRouteControl.getWaypoints().length >= 2) {
+                            const currentOriginLatLng = L.latLng(currentOriginLat, currentOriginLon); // Usar la que se usó para el intento actual
+                            const newLocationLatLng = L.latLng(lat, lon);
+                            // Solo actualizamos el waypoint si la nueva ubicación es significativamente diferente
+                            // para evitar recalcular rutas constantemente por pequeños movimientos.
+                            // Por ejemplo, si se mueve más de 10 metros.
+                            if (newLocationLatLng.distanceTo(currentOriginLatLng) > 10) { 
+                                const waypoints = currentRouteControl.getWaypoints();
+                                waypoints[0].latLng = newLocationLatLng;
+                                currentRouteControl.setWaypoints(waypoints);
+                                console.log("Ruta ajustada por nueva ubicación del usuario.");
+                                // Podrías resetear retryAttempt a 0 aquí si quieres que un movimiento reinicie los intentos de ruteo
+                                // O dejar que el sistema de reintentos actual continúe, lo que es mejor si la red es el problema.
+                            }
+                        }
+                    },
+                    (error) => {
+                        console.error("Error updating location for route:", error);
+                        // No visible message to user for background location updates
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            }
+        }
+
+        // Public wrapper function to start routing (resets retry counter)
+        function obtenerIndicacionesCliente(destLat, destLon) {
+            currentDestLat = destLat; // Store destination for retries
+            currentDestLon = destLon;
+            retryAttempt = 0; // Reset retry counter
+            _obtenerIndicacionesCliente(destLat, destLon);
+        }
+
+        function iniciarNavegacion(destLat, destLon) {
+            if (!ubicacionActualMarker || !ubicacionActualMarker.getLatLng()) {
+                setMensaje("No se pudo obtener tu ubicación actual para iniciar la navegación. Asegúrate de permitir el acceso a tu ubicación.", "warning");
+                return;
+            }
+
+            const originLat = ubicacionActualMarker.getLatLng().lat;
+            const originLon = ubicacionActualMarker.getLatLng().lng;
+
+            // Correct Google Maps URL for turn-by-turn navigation (using Google Maps App scheme)
+            const googleMapsUrl = `http://maps.google.com/maps?saddr=${originLat},${originLon}&daddr=${destLat},${destLon}&dirflg=d`;
+
+            window.open(googleMapsUrl, '_blank');
+            setMensaje("Abriendo navegación en Google Maps...", "info");
+        }
+
+
+        function mostrarUbicacionActual() {
+            if ("geolocation" in navigator) {
+                setMensaje("Obteniendo tu ubicación actual...", "info");
+                
+                if (geolocationWatchId) {
+                    navigator.geolocation.clearWatch(geolocationWatchId);
+                    geolocationWatchId = null;
+                }
+
+                geolocationWatchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+
+                        if (ubicacionActualMarker) {
+                            ubicacionActualMarker.setLatLng([lat, lon]);
+                        } else {
+                            ubicacionActualMarker = L.marker([lat, lon], {
+                                icon: L.divIcon({
+                                    className: 'ubicacion-actual-icon',
+                                    html: '<div style="background-color: #28a745; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>',
+                                    iconSize: [26, 26],
+                                    iconAnchor: [13, 13]
+                                })
+                            }).addTo(mapa)
+                              .bindPopup("¡Estás aquí!").openPopup();
+                            marcadores.push(ubicacionActualMarker);
+                            setMensaje("Tu ubicación actual ha sido marcada.", "success");
+                        }
+                        actualizarVisibilidadEtiquetas(); 
+                    },
+                    (error) => {
+                        let errorMessage = "No se pudo obtener tu ubicación.";
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = "Permiso denegado para acceder a la ubicación. Asegúrate de permitirlo en la configuración de tu navegador.";
+                                if (geolocationWatchId) {
+                                    navigator.geolocation.clearWatch(geolocationWatchId);
+                                    geolocationWatchId = null;
+                                }
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = "Información de ubicación no disponible. Intenta de nuevo más tarde.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = "Tiempo de espera agotado para obtener la ubicación. Intenta de nuevo.";
+                                break;
+                            case error.UNKNOWN_ERROR:
+                                errorMessage = "Error desconocido al obtener la ubicación.";
+                                break;
+                        }
+                        setMensaje(errorMessage, "error");
+                        console.error("Error al obtener ubicación:", error);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                setMensaje("La geolocalización no está soportada por tu navegador. No podrás usar funciones de ubicación.", "error");
+            }
+        }
+
+        // Global functions for button handlers (so they can be called from HTML onclick)
+        window.obtenerIndicacionesCliente = obtenerIndicacionesCliente;
+        window.iniciarNavegacion = iniciarNavegacion;
+
+
+        // PDF Generation Function
+function generarPdf() {
+        if (filteredClientsData.length === 0) {
+            setMensaje("No hay clientes filtrados para generar el PDF.", "warning");
+            return;
+        }
+
+        const ruta = document.getElementById("ruta").value;
+        const dia = document.getElementById("dia").value;
+        const title = `Ruta: ${ruta} - Día de Visita: ${dia}`;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape'); // Establecer orientación a horizontal
+
+       // Ajustar las cabeceras para que coincidan con la estructura de tus datos si no están exactamente como aparecen en el PDF original.
+        // Asegúrate de que las cabeceras aquí coincidan con el orden de las columnas en tu archivo HTML.
+        // He actualizado las cabeceras basándome en el snippet que me proporcionaste.
+       const headers = [
+            "N.", "Código", "Nombre", "Ruta", "Semana", "Día de Visita", "Latitud", "Longitud",
+            "Dirección", "Teléfono", "ID", "RTN", "Canal", "Supervisor", "Región",
+            "Sucursal", "Departamento", "Municipio"
+        ];
+
+        const data = filteredClientsData.map((cliente, index) => [
+            index + 1, // Número de enumeración
+            cliente["Código"] || '',
+            cliente["Nombre"] || '',
+            cliente["Ruta"] || '',
+            cliente["Semana"] || '',
+            cliente["Día de Visita"] || '',
+            cliente["Latitud"] || '',
+            cliente["Longitud"] || '',
+            cliente["Dirección"] || '',
+            cliente["Teléfono"] || '',
+            cliente["ID"] || '',
+            cliente["RTN"] || '',
+            cliente["Canal"] || '',
+            cliente["Supervisor"] || '',
+            cliente["Región"] || '',
+            cliente["Sucursal"] || '',
+            cliente["Departamento"] || '',
+            cliente["Municipio"] || ''
+        ]);
+
+        doc.text(title, 14, 15); // Posición del título
+
+        doc.autoTable({
+            head: [headers],
+            body: data,
+            startY: 25, // Iniciar tabla después del título
+            theme: 'striped',
+            styles: { fontSize: 4, cellPadding: 0.5, overflow: 'linebreak' },
+            headStyles: { fillColor: [44, 62, 80], textColor: 255, fontStyle: 'bold' },
+            // --- AJUSTE DE ANCHOS DE COLUMNA Y MARGEN ---
+            columnStyles: {
+                0: { cellWidth: 8 }, // N. (nueva columna)
+                1: { cellWidth: 10 }, // Código
+                2: { cellWidth: 25 }, // Nombre
+                3: { cellWidth: 10 }, // Ruta
+                4: { cellWidth: 10 }, // Semana
+                5: { cellWidth: 15 }, // Día de Visita
+                6: { cellWidth: 15 }, // Latitud
+                7: { cellWidth: 15 }, // Longitud
+                8: { cellWidth: 30 }, // Dirección
+                9: { cellWidth: 15 }, // Teléfono
+                10: { cellWidth: 15 }, // ID
+                11: { cellWidth: 15 }, // RTN
+                12: { cellWidth: 15 }, // Canal
+                13: { cellWidth: 20 }, // Supervisor
+                14: { cellWidth: 15 }, // Región
+                15: { cellWidth: 15 }, // Sucursal
+                16: { cellWidth: 20 }, // Departamento
+                17: { cellWidth: 20 }   // Municipio
+            },
+            margin: { left: 5, right: 5 }, // Reducir los márgenes izquierdo y derecho
+            // --- FIN AJUSTE DE ANCHOS DE COLUMNA Y MARGEN ---
+            
+            didDrawPage: function (data) {
+                // Pie de página
+                let str = "Página " + doc.internal.getNumberOfPages();
+                const now = new Date();
+                const dateTimeString = now.toLocaleString();
+                doc.setFontSize(10);
+                doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+                doc.text(`Generado: ${dateTimeString}`, doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, { align: 'right' });
+            }
         });
-        let cart = {};
 
-function toggleCartPanel() {
-    document.getElementById('cart-panel').classList.toggle('open');
-}
-
-function addToCart(code, name, description, price) {
-    cart[code] = cart[code] || { name, description, quantity: 0, price };
-    cart[code].quantity += 1;
-    updateCartUI();
-}
-
-function removeFromCart(code) {
-    delete cart[code];
-    updateCartUI();
-}
-
-function changeQuantity(code, change) {
-    cart[code].quantity += change;
-    if (cart[code].quantity <= 0) {
-        delete cart[code];
-    }
-    updateCartUI();
-}
-
-function emptyCart() {
-    cart = {};
-    updateCartUI();
-}
-
-function updateCartUI() {
-    const tbody = document.querySelector('#cartTable tbody');
-    const totalPriceEl = document.getElementById('totalPrice');
-    const cartCountEl = document.getElementById('cart-count');
-    tbody.innerHTML = '';
-
-    let total = 0;
-    let totalItems = 0;
-
-    for (const code in cart) {
-        const item = cart[code];
-        const subtotal = item.quantity * item.price;
-        total += subtotal;
-        totalItems += item.quantity;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${code}</td>
-            <td>${item.name}</td>
-            <td>${item.description}</td>
-            <td>${item.quantity}</td>
-            <td>L. ${subtotal.toFixed(2)}</td>
-            <td>
-                <div style="display: flex; gap: 5px;">
-                    <button onclick="changeQuantity('${code}', -1)">-</button>
-                    <button onclick="changeQuantity('${code}', 1)">+</button>
-                    <button onclick="removeFromCart('${code}')">❌</button>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
+        doc.save(`${ruta}_${dia}_clientes.pdf`);
+        setMensaje("PDF generado correctamente.", "success");
     }
 
-    totalPriceEl.textContent = 'L. ' + total.toFixed(2);
-    cartCountEl.textContent = totalItems;
-    localStorage.setItem('cart', JSON.stringify(cart));
-}
+        // Excel Generation Function
+        function generarExcel() {
+            if (filteredClientsData.length === 0) {
+                setMensaje("No hay clientes filtrados para generar el archivo Excel.", "warning");
+                return;
+            }
 
-function loadCartFromStorage() {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-        cart = JSON.parse(savedCart);
-        updateCartUI();
-    }
-}
+            const ruta = document.getElementById("ruta").value;
+            const dia = document.getElementById("dia").value;
+            const fileName = `${ruta}_${dia}_clientes.xlsx`;
 
-function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+            // Prepare data with headers
+            const headers = [
+                "Código", "Nombre", "Ruta", "Semana", "Día de Visita", "Latitud", "Longitud",
+                "Dirección", "Teléfono", "ID", "RTN", "Canal", "Supervisor", "Región",
+                "Sucursal", "Departamento", "Municipio"
+            ];
+            
+            const data = [headers];
+            filteredClientsData.forEach(cliente => {
+                data.push([
+                    cliente["Código"] || '',
+                    cliente["Nombre"] || '',
+                    cliente["Ruta"] || '',
+                    cliente["Semana"] || '',
+                    cliente["Día de Visita"] || '',
+                    cliente["Latitud"] || '',
+                    cliente["Longitud"] || '',
+                    cliente["Dirección"] || '',
+                    cliente["Teléfono"] || '',
+                    cliente["ID"] || '',
+                    cliente["RTN"] || '',
+                    cliente["Canal"] || '',
+                    cliente["Supervisor"] || '',
+                    cliente["Región"] || '',
+                    cliente["Sucursal"] || '',
+                    cliente["Departamento"] || '',
+                    cliente["Municipio"] || ''
+                ]);
+            });
 
-  // Define margins (in points)
-  const margin = 10;
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Clientes");
+            XLSX.writeFile(wb, fileName);
+            setMensaje("Archivo Excel generado correctamente.", "success");
+        }
 
-  const title = 'Carrito de Compra';
-  let subtitle = 'BIA HONDURAS - Café & Representadas';
-
-  // Función para mostrar un prompt estilizado (simulado)
-  function fancyPrompt(message, defaultValue) {
-      // En un entorno real, podrías usar un modal personalizado en lugar de `prompt()`
-      const userInput = prompt(message, defaultValue);
-      return userInput;
-  }
-
-  // Solicitar al usuario el nombre para la factura
-  const clientName = fancyPrompt(
-      "Ingrese el nombre del cliente y Codigo:",
-      "" // Valor por defecto vacío
-  );
-
-  // Actualizar el subtítulo si el usuario ingresa un nombre
-  if (clientName && clientName.trim() !== "") {
-      subtitle = `Nombre de cliente: ${clientName}`;
-  }
-
-  // Añadir título
-  doc.setFontSize(14); // Smaller title font
-  doc.text(title, pageWidth / 2, margin + 5, null, null, 'center'); // Adjust y position
-
-  // Añadir subtítulo
-  doc.setFontSize(10); // Smaller subtitle font
-  doc.text(subtitle, pageWidth / 2, margin + 15, null, null, 'center'); // Adjust y position
-
-  doc.setFontSize(8); // Smaller general font
-  let y = margin + 25; // Adjust y position
-  let total = 0;
-  let rowNumber = 1;
-
-  // Encabezados
-  doc.setFont(undefined, 'bold');
-  doc.text("No.", margin, y);
-  doc.text("Código", margin + 10, y);
-  doc.text("Nombre", margin + 30, y);
-  doc.text("Descripción", margin + 70, y); // Increased space
-  doc.text("Cant.", margin + 130, y); // Increased space
-  doc.text("Precio", margin + 140, y);
-  doc.text("Subtotal", margin + 155, y);
-  doc.setFont(undefined, 'normal');
-
-  y += 5; // Reduced spacing
-
-  for (let code in cart) {
-      const item = cart[code];
-      const subtotal = item.quantity * item.price;
-      total += subtotal;
-
-      if (y > pageHeight - margin - 20) { // Check for page break
-          doc.addPage();
-          y = margin + 5; // Reset y position
-
-          // Volver a añadir encabezados
-          doc.setFont(undefined, 'bold');
-          doc.text("No.", margin, y);
-          doc.text("Código", margin + 10, y);
-          doc.text("Nombre", margin + 30, y);
-          doc.text("Descripción", margin + 70, y); // Increased space
-          doc.text("Cant.", margin + 130, y); // Increased space
-          doc.text("Precio", margin + 140, y);
-          doc.text("Subtotal", margin + 155, y);
-          doc.setFont(undefined, 'normal');
-
-          y += 5; // Reduced spacing
-      }
-
-      doc.text(String(rowNumber), margin, y);
-      doc.text(code, margin + 10, y);
-      doc.text(item.name, margin + 30, y);
-      doc.text(doc.splitTextToSize(item.description, 60), margin + 70, y); // Wrapped text, more width
-      doc.text(String(item.quantity), margin + 130, y);
-      doc.text(`L. ${item.price.toFixed(2)}`, margin + 140, y);
-      doc.text(`L. ${subtotal.toFixed(2)}`, margin + 155, y);
-
-      y += 5; // Reduced spacing
-      rowNumber++;
-  }
-
-  // Total
-  y += 8; // Reduced spacing
-  doc.setFont(undefined, 'bold');
-  doc.text(`Total: L. ${total.toFixed(2)}`, margin + 155, y);
-
-  // Fecha y hora al pie de página
-  const currentDate = new Date();
-  const formattedDate = currentDate.toLocaleDateString();
-  const formattedTime = currentDate.toLocaleTimeString(); // Obtener la hora
-  const footerText = `Fecha de emisión: ${formattedDate}  Hora: ${formattedTime}`; // Combinar fecha y hora
-  doc.setFontSize(8);
-  doc.setFont(undefined, 'normal');
-  doc.text(footerText, pageWidth / 2, pageHeight - margin - 2, null, null, 'center'); // Adjust y position
-
-  doc.save('factura_compra.pdf');
-}
-
-
-
+        window.onload = cargarDatos;
     </script>
 </body>
-
 </html>
