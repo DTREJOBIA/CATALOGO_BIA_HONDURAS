@@ -63,7 +63,7 @@
     }
 
     .wrapper {
-      display: flex;
+      display: flex; /* Mantiene el flexbox por defecto para pantallas grandes */
       flex-wrap: wrap;
       justify-content: center;
       gap: 20px;
@@ -71,7 +71,7 @@
     }
 
     .line {
-      width: 200px;
+      width: 200px; /* Ancho fijo para cada línea en pantallas grandes */
       text-align: center;
       transition: transform 0.3s;
     }
@@ -84,6 +84,28 @@
 
     .line:hover {
       transform: scale(1.05);
+    }
+
+    /* Media Query para pantallas más pequeñas (celulares) */
+    @media (max-width: 768px) {
+        .wrapper {
+            display: grid; /* Cambia a CSS Grid para el diseño en 3 columnas */
+            grid-template-columns: repeat(3, 1fr); /* 3 columnas de igual ancho */
+            gap: 15px; /* Espacio entre los elementos de la cuadrícula */
+            padding: 15px;
+        }
+
+        .line {
+            width: auto; /* Permite que el ancho de la línea se adapte a la cuadrícula */
+        }
+    }
+
+    /* Ajuste para pantallas aún más pequeñas (quizás solo 2 columnas) */
+    @media (max-width: 480px) {
+        .wrapper {
+            grid-template-columns: repeat(2, 1fr); /* 2 columnas para pantallas muy pequeñas */
+            gap: 10px;
+        }
     }
 
     .center-button {
