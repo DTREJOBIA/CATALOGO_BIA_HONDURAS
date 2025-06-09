@@ -74,21 +74,50 @@
             margin-top: 20px;
         }
 
-    .line {
-      width: 200px;
-      text-align: center;
-      transition: transform 0.3s;
-    }
+        .line {
+            width: 200px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
 
-    .line img {
-      width: 100%;
-      height: auto;
-      border-radius: 10px;
-    }
+        .line img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
 
-    .line:hover {
-      transform: scale(1.05);
-    }
+        .line:hover {
+            transform: scale(1.05);
+        }
+
+        /* ****************************************************** */
+        /* INICIO DE LA MODIFICACIÓN: SOLO PARA CELULARES */
+        /* ****************************************************** */
+        @media (max-width: 768px) {
+            .wrapper {
+                display: grid; /* Cambia a CSS Grid para el diseño en columnas */
+                grid-template-columns: repeat(3, 1fr); /* 3 columnas de igual ancho */
+                gap: 10px; /* Espacio entre los elementos en móviles */
+                padding: 5px; /* Pequeño padding para no pegar al borde */
+            }
+
+            .line {
+                width: auto; /* Permite que el ancho de la línea se adapte a la cuadrícula */
+                margin: 0; /* Elimina márgenes extras que puedan afectar el grid */
+            }
+        }
+
+        /* Opcional: Ajuste para pantallas muy pequeñas (menos de 480px, quizás 2 columnas) */
+        @media (max-width: 480px) {
+            .wrapper {
+                grid-template-columns: repeat(2, 1fr); /* 2 columnas para pantallas muy pequeñas */
+                gap: 8px;
+                padding: 5px;
+            }
+        }
+        /* ****************************************************** */
+        /* FIN DE LA MODIFICACIÓN */
+        /* ****************************************************** */
 
         .center-button {
             display: block;
