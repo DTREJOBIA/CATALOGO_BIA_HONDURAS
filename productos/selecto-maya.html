@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <a href="/index.html" class="btn-home" title="Inicio">
+    <a href="../index.html" class="btn-home" title="Inicio">
         <svg viewBox="0 0 24 24">
             <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
         </svg>
@@ -206,8 +206,8 @@
 /* Estilos del carrito */
 /* Estilos del carrito *//* Estilos del carrito */
         /* Estilos del carrito */
-        
-        
+       
+       
         #cart-icon {
     position: fixed;
     left: 20px;
@@ -298,8 +298,8 @@
 /* Estilos del carrito */
 /* Estilos del carrito *//* Estilos del carrito */
         /* Estilos del carrito */
-        
-        
+       
+       
         #cart-icon {
     position: fixed;
     left: 20px;
@@ -488,7 +488,8 @@
                 <button class="btn-agregar" onclick="addToCart('100101', 'Café Maya Selecto', '1x15 390 g', 123)">🛒 Agregar</button>    
             </div>
 
-            <div class="product">
+
+                <div class="product">
                 <img src="..\FINAL-AMARILLO.png" alt="Café Maya Selecto" onclick="showFullImage(this.src)">
                 <p>
                     <strong>Café Maya Selecto</strong><br>
@@ -499,40 +500,9 @@
                 <button class="btn-agregar" onclick="addToCart('100100', 'Café Maya Selecto', '1x12 312 g', 99)">🛒 Agregar</button>    
             </div>
 
-            <div class="product">
-                <img src="..\FINAL-AMARILLO.png" alt="Café Maya Selecto" onclick="showFullImage(this.src)">
-                <p>
-                    <strong>Café Maya Selecto</strong><br>
-                    1x10 250 g <br>
-                    Código: 100102<br>
-                    Precio: L. 80
-                </p>
-                <button class="btn-agregar" onclick="addToCart('100102', 'Café Maya Selecto', '1x10 250 g', 80)">🛒 Agregar</button>    
+            
             </div>
-
-            <div class="product">
-                <img src="..\FINAL-AMARILLO.png" alt="Café Maya Selecto" onclick="showFullImage(this.src)">
-                <p>
-                    <strong>Café Maya Selecto</strong><br>
-                    1x6 150 g <br>
-                    Código: 100103<br>
-                    Precio: L. 50
-                </p>
-                <button class="btn-agregar" onclick="addToCart('100103', 'Café Maya Selecto', '1x6 150 g', 50)">🛒 Agregar</button>    
-            </div>
-
-            <div class="product">
-                <img src="..\FINAL-AMARILLO.png" alt="Café Maya Selecto" onclick="showFullImage(this.src)">
-                <p>
-                    <strong>Café Maya Selecto Granel</strong><br>
-                    500 g <br>
-                    Código: 100104<br>
-                    Precio: L. 150
-                </p>
-                <button class="btn-agregar" onclick="addToCart('100104', 'Café Maya Selecto Granel', '500 g', 150)">🛒 Agregar</button>    
-            </div>
-            </div>
-        <a href="javascript:history.back()" class="center-button">⬅ Volver</a>
+       <a href="javascript:history.back()" class="center-button">⬅ Volver</a>
 
     </div>
 
@@ -545,10 +515,13 @@
         <img src="" alt="Full Size Image">
     </div>
 
-    <div id="cart-icon" onclick="toggleCartPanel()">
+    <!-- 🔹 ICONO FLOTANTE -->
+<div id="cart-icon" onclick="toggleCartPanel()">
     🛒 <span id="cart-count">0</span>
   </div>
-    <div id="cart-panel">
+   <!-- 🔹 PANEL DEL CARRITO -->
+  <!-- 🔹 PANEL DEL CARRITO -->
+  <div id="cart-panel">
     <h2>🛒 Carrito</h2>
     <table id="cartTable">
       <thead>
@@ -802,7 +775,7 @@ function downloadPDF() {
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString();
   const formattedTime = currentDate.toLocaleTimeString(); // Obtener la hora
-  const footerText = `Fecha de emisión: ${formattedDate}   Hora: ${formattedTime}`; // Combinar fecha y hora
+  const footerText = `Fecha de emisión: ${formattedDate}  Hora: ${formattedTime}`; // Combinar fecha y hora
   doc.setFontSize(8);
   doc.setFont(undefined, 'normal');
   doc.text(footerText, pageWidth / 2, pageHeight - margin - 2, null, null, 'center'); // Adjust y position
