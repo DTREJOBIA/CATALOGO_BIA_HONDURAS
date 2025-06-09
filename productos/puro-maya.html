@@ -79,7 +79,7 @@
 
         /* Grid de productos */
         .product-grid {
-            display: flex; /* Mantén flexbox por defecto para otras pantallas */
+            display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
@@ -88,7 +88,7 @@
 
         /* Estilo de cada producto */
         .product {
-            width: 200px; /* Mantén el ancho original por defecto */
+            width: 200px;
             text-align: center;
             transition: transform 0.3s;
         }
@@ -104,28 +104,6 @@
             transform: scale(1.05);
         }
 
-        /* Media Queries para responsividad */
-        @media (max-width: 768px) {
-            /* En pantallas medianas (tablets), podrías ajustar a 2 columnas si lo deseas, o mantener el flexbox original */
-            /* .product-grid {
-                justify-content: space-around;
-            }
-            .product {
-                width: 45%; 
-            } */
-        }
-
-        @media (max-width: 480px) { /* Este es el punto de quiebre para celulares */
-            .product-grid {
-                display: grid; /* Cambia a CSS Grid para 3 columnas */
-                grid-template-columns: repeat(3, 1fr); /* 3 columnas de igual ancho */
-                gap: 10px; /* Ajusta el gap para pantallas más pequeñas si es necesario */
-            }
-
-            .product {
-                width: auto; /* Permite que el ancho del producto se adapte a la cuadrícula */
-            }
-        }
         /* Botón centrado */
         .center-button {
             display: block;
@@ -550,10 +528,13 @@
         <img src="" alt="Full Size Image">
     </div>
 
+<!-- 🔹 ICONO FLOTANTE -->
 <div id="cart-icon" onclick="toggleCartPanel()">
     🛒 <span id="cart-count">0</span>
   </div>
-   <div id="cart-panel">
+   <!-- 🔹 PANEL DEL CARRITO -->
+  <!-- 🔹 PANEL DEL CARRITO -->
+  <div id="cart-panel">
     <h2>🛒 Carrito</h2>
     <table id="cartTable">
       <thead>
