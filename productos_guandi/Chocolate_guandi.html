@@ -89,6 +89,19 @@
             width: 200px;
             text-align: center;
             transition: transform 0.3s;
+
+/* Modificaciones para el cuadro transparente y centrado */
+border: 1px solid rgba(221, 221, 221, 0.1); /* Borde más transparente */
+border-radius: 10px;
+padding: 15px;
+background-color: rgba(255, 255, 255, 0.2); /* Fondo más transparente */
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+display: flex;
+flex-direction: column;
+justify-content: center; /* Centrar verticalmente */
+align-items: center; /* Centrar horizontalmente */
+text-align: center; /* Asegurar el texto centrado */
+            
         }
 
         .product img {
@@ -478,7 +491,59 @@
 }
 
  
+/* Media query para móviles (ancho máximo de 768px) */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columnas en móviles */
+        display: grid; /* Usar grid para un mejor control de columnas */
+        gap: 5px; /* Espacio reducido entre los productos */
+        padding: 0 10px; /* Un poco de padding en los lados */
+        justify-content: center; /* Centrar el contenido de la cuadrícula */
+    }
 
+    .product {
+        width: auto; /* Permitir que el grid controle el ancho */
+        padding: 10px; /* Reducir el padding interno */
+    }
+
+    /* Intentar centrar título y footer con align-self */
+    h1.title-3d,
+    footer {
+        align-self: center;
+    }
+}
+
+/* Nuevo: Media query para móviles aún más pequeños (ancho máximo de 480px) */
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas para móviles muy pequeños */
+    }
+}
+
+/* Media query para tabletas (entre 769px y 1024px) - Opcional, para ajustar el número de columnas */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr); /* Por ejemplo, 3 columnas para tabletas */
+        display: grid;
+        gap: 20px;
+    }
+    .product {
+        width: auto;
+    }
+}
+
+/* Estilos para pantallas grandes (desktop) */
+@media (min-width: 1025px) {
+    .product-grid {
+        display: flex; /* Volver a flexbox para pantallas grandes */
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+    .product {
+        width: 200px; /* Mantener el ancho original para pantallas grandes */
+    }
+}
 
 
     </style>
