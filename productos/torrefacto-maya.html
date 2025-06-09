@@ -83,6 +83,15 @@
             width: 200px;
             text-align: center;
             transition: transform 0.3s;
+            /* Añadir estilos para el cuadro */
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex; /* Para centrar el contenido verticalmente si es necesario */
+            flex-direction: column; /* Para apilar el contenido */
+            justify-content: space-between; /* Para distribuir el espacio */
         }
 
         .product img {
@@ -90,6 +99,13 @@
             height: auto;
             border-radius: 10px;
             cursor: pointer;
+            flex-shrink: 0; /* Evita que la imagen se encoja */
+        }
+
+        .product p {
+            flex-grow: 1; /* Permite que el párrafo ocupe el espacio disponible */
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         .product:hover {
@@ -465,6 +481,46 @@
     background-color: #666;
 }
 
+        /* Media query para móviles (ancho máximo de 768px) */
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3 columnas en móviles */
+                display: grid; /* Usar grid para un mejor control de columnas */
+                gap: 15px; /* Espacio entre los productos */
+                padding: 0 10px; /* Un poco de padding en los lados */
+            }
+
+            .product {
+                width: auto; /* Permitir que el grid controle el ancho */
+                padding: 10px; /* Reducir el padding interno */
+            }
+        }
+
+        /* Media query para tabletas (entre 769px y 1024px) - Opcional, para ajustar el número de columnas */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr); /* Por ejemplo, 3 columnas para tabletas */
+                display: grid;
+                gap: 20px;
+            }
+            .product {
+                width: auto;
+            }
+        }
+
+        /* Estilos para pantallas grandes (desktop) */
+        @media (min-width: 1025px) {
+            .product-grid {
+                display: flex; /* Volver a flexbox para pantallas grandes */
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 20px;
+            }
+            .product {
+                width: 200px; /* Mantener el ancho original para pantallas grandes */
+            }
+        }
+
 
     </style>
 </head>
@@ -521,13 +577,10 @@
         <img src="" alt="Full Size Image">
     </div>
 
-    <!-- 🔹 ICONO FLOTANTE -->
-<div id="cart-icon" onclick="toggleCartPanel()">
+    <div id="cart-icon" onclick="toggleCartPanel()">
     🛒 <span id="cart-count">0</span>
   </div>
-   <!-- 🔹 PANEL DEL CARRITO -->
-  <!-- 🔹 PANEL DEL CARRITO -->
-  <div id="cart-panel">
+   <div id="cart-panel">
     <h2>🛒 Carrito</h2>
     <table id="cartTable">
       <thead>
