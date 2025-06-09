@@ -500,10 +500,17 @@
                 padding: 10px; /* Reducir el padding interno */
             }
 
-            /* Nuevo: Intentar centrar título y footer con align-self */
+            /* Intentar centrar título y footer con align-self */
             h1.title-3d,
             footer {
                 align-self: center;
+            }
+        }
+
+        /* Nuevo: Media query para móviles aún más pequeños (ancho máximo de 480px) */
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 columnas para móviles muy pequeños */
             }
         }
 
